@@ -75,12 +75,13 @@ Tract16MN <- left_join(TractID, Tract16, by=c("GEOID" = "GEOID")) %>%
 
 # Join the census tracts data with the lead data
 minchildlead$tract_id <- as.character(Minchildlead$tract_id)
-tract16withLD <- right_join(Minchildlead, Tract16MN, by=c("tract_id" = "GEOID")) %>%
+tract16withLD <- right_join(minchildlead, Tract16MN, by=c("tract_id" = "GEOID")) %>%
   dplyr::select(-TotalMaleUnder5,-TotalMale5to9,-TotalFemaleUnder5,-TotalFemale5to9,-pct_ebll_cat,-primary_county,-Num_EBLLs_tract) %>%
   dplyr::rename(id = tract_id) %>%
   st_as_sf()
 
 # name to lower case
+tract16withld <- tract16withLD
 names(tract16withld) <- tolower(names(tract16withld))
 
 # transform to simple feature
@@ -89,6 +90,19 @@ tract16withld <- st_as_sf(tract16withld)
 # Create centroids for each 
 tract16ct <- st_centroid(tract16withld)%>%
   st_as_sf()
+
+# clean the Percent of children with EBLL
+tract16withld$pct_ebll_county <- gsub("%","", tract16withld$pct_ebll_county)
+
+tract16withld$per_eblls_label <- gsub("%","", tract16withld$per_eblls_label)
+
+tract16withld$per_eblls_label <- gsub("About ","", tract16withld$per_eblls_label)
+
+tract16withld$per_eblls_label <- gsub("1.1-","", tract16withld$per_eblls_label)
+
+tract16withld$pct_ebll_county <- as.numeric(tract16withld$pct_ebll_county)
+
+tract16withld$per_eblls_label <- as.numeric(tract16withld$per_eblls_label)
 
 #write the minneapolis children's lead polygon data to database
 st_write_db(con, tract16withld, "tract16withld",drop = TRUE)
@@ -105,3 +119,5 @@ dbGetQuery(con, "SELECT * FROM geometry_columns")
 tracts = st_read_db(con, query = "SELECT * FROM tract16withld", geom_column = 'wkb_geometry')
 
 points = st_read_db(con, query = "SELECT * FROM tract16ct", geom_column = 'wkb_geometry')
+
+

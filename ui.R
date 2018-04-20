@@ -7,7 +7,6 @@ library(rsconnect)
 rsconnect::setAccountInfo(name='echoxiaowu',
                           token='1585CEB73E03B759606B594D20BD30C8',
                           secret='CtRTt06ImILgniEC03Ugr3oOEwbubf3xmzTHasqU')
-
 fluidPage(
   
   titlePanel("2016 Childhood Lead Exposure in Minneapolis"),
@@ -33,9 +32,8 @@ fluidPage(
            uiOutput("selectEBLL")
     ),
     column(5,
-           actionButton("recalc", "Generate new points")
+           actionButton("recalc", "Display Tracts")
            
     )
   )
 )
-
